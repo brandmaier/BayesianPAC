@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bayesian Preregistration As Code (B-PAC)</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Andreas Brandmaier, (and Aaron Peikert, Caspar van Lissa)" />
+    <meta name="date" content="2021-12-16" />
+    <script src="libs/header-attrs-2.10/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Bayesian Preregistration As Code (B-PAC)
+### Andreas Brandmaier, (and Aaron Peikert, Caspar van Lissa)
+### 2021-12-16
+
+---
+
+
+
+
+# Claim
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+## Computational reproducibility has a variety of benefits for (Bayesian) preregistration
+&lt;br&gt;&lt;br&gt;
+
+---
+
+class: center
+
+# Replication ≠ Reproduction
+
+&lt;br&gt;
+
+## Replicability: 
+### Same conclusion from same analysis and new data
+
+&lt;br&gt;
+--
+
+## Reproducibility: 
+### Same conclusion from same analysis and same data
+
+---
+
+
+class: clear middle center large
+
+## Your closest collaborator is you six months ago, but you don’t reply to emails.
+
+.footnote[From Karl Broman's lecture on reproducibility, paraphrasing Mark Holden]
+
+---
+
+# Reproducibility is hard!
+
+- Hardwicke et al. (2018): Out of 35 articles in _Cognition_, 22 could be reproduced but 11 of those required authors' assistance. For 13 articles, at least one outcome could not be reproduced even with the original authors' assistance.
+
+--
+
+- Obels et al. (2020) show that in 62 Registered Reports, 41 had data available, 37 had analysis scripts available. The authors could run 31 of the scripts and reproduced 21 articles (within reasonable amount of time)
+
+.footnote[https://doi.org/10.1098/rsos.180448 and https://doi.org/10.1177%2F2515245920918872]
+
+---
+
+# Sources of Failure to Reproduce Results
+
+
+.pull-right[ ![](images/markus-spiske-yUTgdQkbd7c-unsplash.jpg) ]
+
+1. *Multiple versions of scripts/data* (e.g., dataset has changed over, i.e., was further cleaned or extended)
+
+--
+
+2. *Multiple scripts* in a pipeline; unclear which scripts should be executed in which order
+
+--
+
+3. *Copy&amp;paste errors* (e.g., inconsistency between reported result and reproduced result)
+
+--
+
+4. Ill-defined *software dependencies* (e.g., incompatible version, missing package)
+
+---
+
+class: left, middle, inverse
+background-image: url(http://3.bp.blogspot.com/-c7bI_n5oXd0/U7vTYArmRoI/AAAAAAAAKoQ/3JkxLM2PRKo/s1600/gospels-meme.jpg)
+background-position: right
+
+# Famous Examples
+
+---
+
+
+### 1.	Bugfix in random number generator in R between R 3.5 and R 3.6
+
+
+```r
+set.seed(1234); 
+sample(1:10, 5) 
+```
+
+--
+
+
+```r
+2 6 5 8 9 (R3.5)
+```
+
+--
+
+
+```r
+10 6 5 4 1 (R3.6.1)
+```
+
+---
+
+# Examples of Non-Reproducible Code in R
+
+Confidence intervals (95%) of a simple regression coefficient estimate (with identical random seed):
+
+.pull-left[
+
+```r
+[1] "R version 3.5.0 (2018-04-23)"
+
+2.5 % 97.5 %
+ 0.0097 0.3842
+```
+]
+
+--
+
+.pull-right[
+
+```r
+ [1] "R version 3.6.1 (2019-07-05)"
+
+ 2.5 % 97.5 %
+ -0.0005 0.3748
+```
+]
+
+.footnote[Note that even though the results are not reproduced, they replicated.]
+
+---
+
+#  Examples of Non-Reproducible Code in R
+	
+### 2.	Locale-dependent behavior (e.g., English vs Lithuania):
+
+
+```r
+sort(state.abb) 
+
+[1] "AK" "AL" "AR" "AZ" "CA" "CO" "CT" "DE" "FL" "GA" "HI" "IA" 
+[13] "ID" "IL" "IN" "KY" "KS" "LA" "MA" "MD" "ME" "MI" "MN" "MO" 
+[25] "MS" "MT" "NC" "ND" "NE" "NH" "NY" "NJ" "NM" "NV" "OH" "OK" 
+[37] "OR" "PA" "RI" "SC" "SD" "TN" "TX" "UT" "VA" "VT" "WA" "WI" 
+[49] "WY" "WV"
+```
+
+---
+
+# Four Elements of Reproducibility
+
+&lt;center&gt;
+&lt;img src="images/nutshell.svg" width="80%" /&gt;
+&lt;/center&gt;
+
+&lt;!--.footnote[from Peikert and Brandmaier (2020)]
+--&gt;
+---
+
+# Preregistration
+
+## Preregistration:
+
+&gt; Specifying your research plan in advance of your study and submitting it to a registry.
+
+## Goals:
+
+- Clear Separation of hypothesis-generating (exploratory) and hypothesis-testing (confirmatory) research. 
+- Reducing _undisclosed_ researchers degrees-of-freedom
+
+---
+
+# Shortcomings of preregistrations
+
+* It's just a lot of extra work
+* Is anybody ever going to read the preregistration other than the reviewers?
+* Residual ambiguity
+* Difficult to compare to final manuscript to examine deviations from preregistration (which are OK!)
+
+---
+
+# Solution: *PAC: Preregistration as Code*
+
+1. Preregister reproducible document with draft of manuscript
+2. Include all code for planned analyses
+3. Use fake (simulated/synthetic) data to obtain placeholder results
+4. Draft everything up to including _Results_ section based on placeholder results
+
+After collecting real data:
+
+5. Re-compile document 
+6. Write _Discussion_ section
+7. Publish
+
+---
+
+# Advantages
+
+* Extra work / is anybody going to read it?
+    + You're not writing a separate document, but an early version of the final manuscript
+    + You need to write code to analyze the data anyway
+* Ambiguity
+    + You become aware of ambiguity in your planned analysis when you start actually running it 
+   *  Difficult to compare
+    + All changes are tracked in code (e.g., via github)
+
+---
+
+# Bayesian Preregistration
+
+&gt; 
+Authors should indicate what distribution will be used to represent the predictions of the theory and how its parameters will be specified. For example, will you use a uniform up to some specified maximum, or a normal/half-normal to represent a likely effect size (Dienes, 2011), or a JZS/Cauchy with a specified scaling constant (Rouder et al., 2009)? The parameters need not be stated in advance, but where unstated, authors must indicate what aspect of data will be used to set those parameters
+
+Bayesian analyis may increase researchers degrees-of-freedom (Simmons, Nelson, and Simonsohn, 2011)
+
+---
+
+# Bayesian PAC
+
+- PAC easily extends to Bayesian methods
+- Sharing reproducible code may empower others (reviewers, editors, readers) to specify their own priors 
+- Bayesian PAC may enable us to elicit expert priors
+- We can either do different what-if-scenarios (subjunctive priors) or mixture priors
+- Extreme scenario: A call for priors is issued along with the preregistration
+
+
+---
+
+# Reviewers' (subjunctive) priors
+
+.pull-left[ 
+- divergent beliefs
+- one group beliefs in a negative effect and one group in a narrower effect
+- less uncertainty associated with the belief in the narrower effect. - plus a broad and uninformed believe (editor)
+- posterior belief is a mixture (black)
+]
+
+.pull-right[ 
+![](brandmaier-presentation_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+]
+---
+
+# Let's discuss
+
+
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
