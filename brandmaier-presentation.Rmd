@@ -245,7 +245,7 @@ Bayesian analyis may increase researchers degrees-of-freedom (Simmons, Nelson, a
 - Bayesian PAC may enable us to elicit expert priors
 - We can either do different what-if-scenarios (subjunctive priors) or mixture priors
 - Extreme scenario: A call for priors is issued along with the preregistration
-
+- B-PAC also affords dynamic priors (on download)
 
 ---
 
@@ -282,8 +282,7 @@ gpl <- ggplot(data = df,mapping=aes(x = x,y=y,group=Legend,color=Legend))+geom_l
 ]
 ---
 
-# Let's discuss
+# More here... let's discuss!
 
+![](images/mdpi.png) ]
 
-
----
